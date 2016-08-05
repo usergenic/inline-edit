@@ -4,18 +4,24 @@
 `inline-edit`
 Works like an input, but conforms to whatever your surrounding context is.  Useful to make &#34;click to edit&#34; areas of the page or text entry for unique situations.
 
-@demo demo/index.html 
+@demo demo/index.html
 -->
 
 <dom-module id="inline-edit">
-  <template>
-    <style>
-      :host {
-        display: block;
-      }
-    </style>
-    <h2>Hello [[prop1]]</h2>
-  </template>
+  <template><span
+        id="editable"
+        contenteditable="true"
+        on-keyup="_resync"
+        on-blur="_resync"
+        on-keypress="_handleKeypress"
+        on-paste="_handlePaste"><!--
+  --></span><!--
+  --><style>
+    #editable {
+      outline: 0px solid transparent;
+    }
+    </style><!--
+  --></template>
 
   <script>
     Polymer({
@@ -23,11 +29,81 @@ Works like an input, but conforms to whatever your surrounding context is.  Usef
       is: 'inline-edit',
 
       properties: {
-        prop1: {
+        value: {
           type: String,
-          value: 'inline-edit',
+          notify: true,
+          observer: '_valueChanged'
         },
+        multiline: {
+          type: Boolean,
+          reflectToAttribute: true
+        }
       },
+
+      attached: function() {
+        if (this.value) {
+          this.$.editable.value = this.value;
+        }
+      },
+
+      focus: function() {
+        this.$.editable.focus();
+      },
+
+      select: function() {
+        var firstChild = this.$.editable.firstChild;
+        var range = document.createRange();
+        range.setStart(firstChild, 0);
+        range.setEnd(firstChild, firstChild.length);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      },
+
+      _containsForbiddenHTML: function(html) {
+        return (this.multiline ? /<(?!br ?\/?>)/ : /<|>/).test(html);
+      },
+
+      _handlePaste: function(event_) {
+        event_.preventDefault();
+        var clipboardData = (event_.originalEvent || event_).clipboardData;
+        var text = clipboardData.getData('text/plain');
+        if (!this.multiline) {
+          text = this._stripNewLines(text);
+        }
+        window.document.execCommand('insertText', false, text);
+      },
+
+      _handleKeypress: function(event_) {
+        if (!this.multiline &&
+            (event_.keyCode == 13 || event_.keyCode == 10)) {
+          event_.preventDefault();
+        }
+      },
+
+      _resync: function() {
+        // Brute-force resanitization when forbidden HTML is detected.
+        if (this._containsForbiddenHTML(this.$.editable.innerHTML)) {
+          if (this.multiline) {
+            this.$.editable.innerText = this.value;
+          } else {
+            this.$.editable.innerText = this._stripNewLines(this.value);
+          }
+        }
+        if (this.value != this.$.editable.innerText) {
+          this.value = this.$.editable.innerText;
+        }
+      },
+
+      _stripNewLines: function(text) {
+        return text.replace(/(\n|\r)+/g, ' ');
+      },
+
+      _valueChanged: function(newValue) {
+        if (this.$.editable.innerText != newValue) {
+          this.$.editable.innerText = newValue;
+        }
+      }
 
     });
   </script>

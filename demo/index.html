@@ -20,7 +20,34 @@
       <h3>Basic inline-edit Demo</h3>
       <demo-snippet>
         <template>
-          <inline-edit></inline-edit>
+          <dom-module id="inline-edit-demo">
+            <template>
+              <h1>
+                Hello, my name is
+                <u><inline-edit id="name" value="{{name}}"></inline-edit></u>.
+              </h1>
+              <h1>
+                Ok.  Greetings, {{name}}.
+              </h1>
+            </template>
+            <script>
+              Polymer({
+                is: 'inline-edit-demo',
+                properties: {
+                  name: {
+                    type: String,
+                    value: 'Bob'
+                  }
+                },
+                attached: function() {
+                  this.name = 'Bob';
+                  this.$.name.focus();
+                  this.$.name.select();
+                }
+              });
+            </script>
+          </dom-module>
+          <inline-edit-demo></inline-edit-demo>
         </template>
       </demo-snippet>
     </div>
