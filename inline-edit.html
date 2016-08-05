@@ -1,0 +1,34 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+`inline-edit`
+Works like an input, but conforms to whatever your surrounding context is.  Useful to make &#34;click to edit&#34; areas of the page or text entry for unique situations.
+
+@demo demo/index.html 
+-->
+
+<dom-module id="inline-edit">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+    </style>
+    <h2>Hello [[prop1]]</h2>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'inline-edit',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'inline-edit',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
